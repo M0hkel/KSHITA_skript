@@ -57,6 +57,10 @@ Format-Volume -Partition $Partition -FileSystem NTFS -NewFileSystemLabel "Backup
 
 Install-WindowsFeature Windows-Server-Backup
 
+$BackupDriveLetter = "$($Partition.DriveLetter):"
+Write-Output "Configuring Windows Server Backup to use drive $BackupDriveLetter"
+wbadmin enable backup -backupTarget:$BackupDriveLetter -include:C: -allCritical -schedule:"03:00" -quiet
+
 $restartInput = Read-Host "Skripti täitmine lõpetatud. Taaskäivitage süsteem? ([Y]/n)"
 if ($restartInput -eq "" -or $restartInput.ToLower() -eq "y") {
     Restart-Computer -Force
