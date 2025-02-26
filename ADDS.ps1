@@ -88,6 +88,13 @@ try {
 }
 
 try {
+    Install-Module PSWindowsBackup -Force -Confirm:$false -ErrorAction Stop
+    Import-Module PSWindowsBackup -ErrorAction Stop
+} catch {
+    Write-Output "Backup module download error: $_"
+}
+
+try {
     $BackupDriveLetter = "$($Partition.DriveLetter):"
     Write-Output "Configuring Windows Server Backup to use drive $BackupDriveLetter"
     wbadmin enable backup -backupTarget:$BackupDriveLetter -include:C: -allCritical -schedule:"03:00" -quiet -ErrorAction Stop
