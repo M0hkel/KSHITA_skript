@@ -24,42 +24,76 @@ if ($dhcpIP) {
     }
 }
 
-Get-NetIPAddress -InterfaceAlias $InterfaceAlias | Remove-NetIPAddress -Confirm:$false
-
-New-NetIPAddress -InterfaceAlias $InterfaceAlias -IPAddress $NewIPAddress -PrefixLength $PrefixLength -DefaultGateway $DefaultGateway
-Set-DnsClientServerAddress -InterfaceAlias $InterfaceAlias -ServerAddresses $DNSServers
+try {
+    Get-NetIPAddress -InterfaceAlias $InterfaceAlias | Remove-NetIPAddress -Confirm:$false -ErrorAction Stop
+    New-NetIPAddress -InterfaceAlias $InterfaceAlias -IPAddress $NewIPAddress -PrefixLength $PrefixLength -DefaultGateway $DefaultGateway -ErrorAction Stop
+    Set-DnsClientServerAddress -InterfaceAlias $InterfaceAlias -ServerAddresses $DNSServers -ErrorAction Stop
+} catch {
+    Write-Output "Network configuration error: $_"
+}
 
 $NewDomainName = "mihkel.sise"
 $SafeModePwd   = ConvertTo-SecureString "Parool1!" -AsPlainText -Force
 
-Install-WindowsFeature AD-Domain-Services -IncludeManagementTools
-Import-Module ADDSDeployment
+try {
+    Install-WindowsFeature AD-Domain-Services -IncludeManagementTools -ErrorAction Stop
+    Import-Module ADDSDeployment -ErrorAction Stop
+} catch {
+    Write-Output "AD Domain Services installation error: $_"
+}
 
-Install-ADDSForest `
-    -DomainName $NewDomainName `
-    -SafeModeAdministratorPassword $SafeModePwd `
-    -InstallDNS `
-    -Force `
-    -NoRebootOnCompletion
+try {
+    Install-ADDSForest `
+        -DomainName $NewDomainName `
+        -SafeModeAdministratorPassword $SafeModePwd `
+        -InstallDNS `
+        -Force `
+        -NoRebootOnCompletion -ErrorAction Stop
+} catch {
+    Write-Output "ADDS Forest installation error: $_"
+}
 
-Install-Module PSWindowsUpdate -Force -Confirm:$false
-Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
-Import-Module PSWindowsUpdate
+try {
+    Install-Module PSWindowsUpdate -Force -Confirm:$false -ErrorAction Stop
+    Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted -ErrorAction Stop
+    Import-Module PSWindowsUpdate -ErrorAction Stop
+} catch {
+    Write-Output "Windows Update module configuration error: $_"
+}
 
-$Action  = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -WindowStyle Hidden -Command `"Install-WindowsUpdate -AcceptAll -AutoReboot`""
-$Trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Saturday -At 3am
-Register-ScheduledTask -Action $Action -Trigger $Trigger -TaskName "WeeklyWindowsUpdate" -Description "Kaivitab Windows Update iga naadal."
+$Action = New-ScheduledTaskAction `
+    -Execute "PowerShell.exe" `
+    -Argument "-NoProfile -WindowStyle Hidden -Command `"Install-WindowsUpdate -AcceptAll -AutoReboot`""
+$Trigger = New-ScheduledTaskTrigger `
+    -Weekly `
+    -DaysOfWeek Saturday `
+    -At 3am
+try {
+    Register-ScheduledTask `
+        -Action $Action `
+        -Trigger $Trigger `
+        -TaskName "WeeklyWindowsUpdate" `
+        -Description "Kaivitab Windows Update iga naadal." -ErrorAction Stop
+} catch {
+    Write-Output "Scheduled task registration error: $_"
+}
 
 $DiskNumber = 1
-Initialize-Disk -Number $DiskNumber -PartitionStyle GPT -Confirm:$false
-$Partition  = New-Partition -DiskNumber $DiskNumber -UseMaximumSize -AssignDriveLetter
-Format-Volume -Partition $Partition -FileSystem NTFS -NewFileSystemLabel "BackupVolume" -Confirm:$false
+try {
+    Initialize-Disk -Number $DiskNumber -PartitionStyle GPT -Confirm:$false -ErrorAction Stop
+    $Partition = New-Partition -DiskNumber $DiskNumber -UseMaximumSize -AssignDriveLetter -ErrorAction Stop
+    Format-Volume -Partition $Partition -FileSystem NTFS -NewFileSystemLabel "BackupVolume" -Confirm:$false -ErrorAction Stop
+} catch {
+    Write-Output "Disk configuration error: $_"
+}
 
-Install-WindowsFeature Windows-Server-Backup
-
-$BackupDriveLetter = "$($Partition.DriveLetter):"
-Write-Output "Configuring Windows Server Backup to use drive $BackupDriveLetter"
-wbadmin enable backup -backupTarget:$BackupDriveLetter -include:C: -allCritical -schedule:"03:00" -quiet
+try {
+    $BackupDriveLetter = "$($Partition.DriveLetter):"
+    Write-Output "Configuring Windows Server Backup to use drive $BackupDriveLetter"
+    wbadmin enable backup -backupTarget:$BackupDriveLetter -include:C: -allCritical -schedule:"03:00" -quiet -ErrorAction Stop
+} catch {
+    Write-Output "Backup configuration error: $_"
+}
 
 $restartInput = Read-Host "Skripti taitmine lopetatud. Taaskaivitage susteem? ([Y]/n)"
 if ($restartInput -eq "" -or $restartInput.ToLower() -eq "y") {
