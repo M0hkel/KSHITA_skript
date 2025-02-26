@@ -46,7 +46,7 @@ Install-Module PSWindowsUpdate -Force -Confirm:$false
 Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
 Import-Module PSWindowsUpdate
 
-$Action  = New- Schedu ledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -WindowStyle Hidden -Command `"Install-WindowsUpdate -AcceptAll -AutoReboot`""
+$Action  = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -WindowStyle Hidden -Command `"Install-WindowsUpdate -AcceptAll -AutoReboot`""
 $Trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Saturday -At 3am
 Register-ScheduledTask -Action $Action -Trigger $Trigger -TaskName "WeeklyWindowsUpdate" -Description "Käivitab Windows Update iga nädal."
 
@@ -57,4 +57,9 @@ Format-Volume -Partition $Partition -FileSystem NTFS -NewFileSystemLabel "Backup
 
 Install-WindowsFeature Windows-Server-Backup
 
-Write-Output "Skripti täitmine lõpetatud. Palun taaskäivitage süsteem."
+$restartInput = Read-Host "Skripti täitmine lõpetatud. Taaskäivitage süsteem? ([Y]/n)"
+if ($restartInput -eq "" -or $restartInput.ToLower() -eq "y") {
+    Restart-Computer -Force
+} else {
+    Write-Output "Süsteemi taaskäivitamist ei sooritatud."
+}
