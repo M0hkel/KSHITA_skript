@@ -90,16 +90,12 @@ try {
 try {
     Install-Module PSWindowsBackup -Force -Confirm:$false -ErrorAction Stop
     Import-Module PSWindowsBackup -ErrorAction Stop
-} catch {
-    Write-Output "Varundusmooduli allalaadimise viga: $_"
-}
-
-try {
+    Install-WindowsFeature Windows-Server-Backup -ErrorAction Stop
     $BackupDriveLetter = "$($Partition.DriveLetter):"
     Write-Output "Seadistatakse Windows Server Backup kasutama ketast $BackupDriveLetter"
     wbadmin enable backup -backupTarget:$BackupDriveLetter -include:C: -allCritical -schedule:"03:00" -quiet -ErrorAction Stop
 } catch {
-    Write-Output "Varunduse konfiguratsiooni viga: $_"
+    Write-Output "Varunduse seadistamise viga: $_"
 }
 
 $restartInput = Read-Host "Skripti täitmine lõppenud. Taaskäivitage süsteem? ([Y]/n)"
