@@ -57,4 +57,9 @@ Format-Volume -Partition $Partition -FileSystem NTFS -NewFileSystemLabel "Backup
 
 Install-WindowsFeature Windows-Server-Backup
 
-Write-Output "Skripti täitmine lõpetatud. Palun taaskäivitage süsteem."
+$restartInput = Read-Host "Skripti täitmine lõpetatud. Taaskäivitage süsteem? ([Y]/n)"
+if ($restartInput -eq "" -or $restartInput.ToLower() -eq "y") {
+    Restart-Computer -Force
+} else {
+    Write-Output "Süsteemi taaskäivitamist ei sooritatud."
+}
