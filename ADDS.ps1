@@ -10,7 +10,7 @@ $dhcpIP = Get-NetIPAddress -InterfaceAlias $InterfaceAlias -AddressFamily IPv4 |
 if ($dhcpIP) {
     $NewIPAddress = $dhcpIP.IPAddress
     $PrefixLength = $dhcpIP.PrefixLength
-    Write-Output "Kasutatan DHCP kaudu määratud IP aadressi $NewIPAddress staatilisena."
+    Write-Output "Kasutatan DHCP kaudu maaratud IP aadressi $NewIPAddress staatilisena."
 
     $dhcpRoute = Get-NetRoute -InterfaceAlias $InterfaceAlias | 
         Where-Object { $_.NextHop -and $_.NextHop -ne "0.0.0.0" } | Select-Object -First 1
@@ -48,7 +48,7 @@ Import-Module PSWindowsUpdate
 
 $Action  = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-NoProfile -WindowStyle Hidden -Command `"Install-WindowsUpdate -AcceptAll -AutoReboot`""
 $Trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Saturday -At 3am
-Register-ScheduledTask -Action $Action -Trigger $Trigger -TaskName "WeeklyWindowsUpdate" -Description "Käivitab Windows Update iga nädal."
+Register-ScheduledTask -Action $Action -Trigger $Trigger -TaskName "WeeklyWindowsUpdate" -Description "Kaivitab Windows Update iga naadal."
 
 $DiskNumber = 1
 Initialize-Disk -Number $DiskNumber -PartitionStyle GPT -Confirm:$false
@@ -61,9 +61,9 @@ $BackupDriveLetter = "$($Partition.DriveLetter):"
 Write-Output "Configuring Windows Server Backup to use drive $BackupDriveLetter"
 wbadmin enable backup -backupTarget:$BackupDriveLetter -include:C: -allCritical -schedule:"03:00" -quiet
 
-$restartInput = Read-Host "Skripti täitmine lõpetatud. Taaskäivitage süsteem? ([Y]/n)"
+$restartInput = Read-Host "Skripti taitmine lopetatud. Taaskaivitage susteem? ([Y]/n)"
 if ($restartInput -eq "" -or $restartInput.ToLower() -eq "y") {
     Restart-Computer -Force
 } else {
-    Write-Output "Süsteemi taaskäivitamist ei sooritatud."
+    Write-Output "Susteemi taaskaivitamist ei sooritatud."
 }
