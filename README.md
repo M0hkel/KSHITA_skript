@@ -6,4 +6,4 @@
 - **Active Directory domeeniteenused:** Skript installib AD DS-i ja konfigureerib uue metsa. Kontrolli oma domeeni parameetreid.  
 - **Varundamise seadistus:** Varundamiseks kasutatav ketas on number 1; veendu, et see oleks saadaval ja mitte kasutusel.
   
-Tagada, et need nouded oleksid taidetud skripti edukaks kaivitamiseks.
+Taga, et need nouded oleksid taidetud skripti edukaks kaivitamiseks.
