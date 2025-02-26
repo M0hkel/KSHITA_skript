@@ -10,7 +10,7 @@ $dhcpIP = Get-NetIPAddress -InterfaceAlias $InterfaceAlias -AddressFamily IPv4 |
 if ($dhcpIP) {
     $NewIPAddress = $dhcpIP.IPAddress
     $PrefixLength = $dhcpIP.PrefixLength
-    Write-Output "Kasutatan DHCP kaudu maaratud IP adressi $NewIPAddress staatilisena."
+    Write-Output "Kasutan DHCP kaudu määratud IP-aadressi $NewIPAddress staatilisena."
 
     $dhcpRoute = Get-NetRoute -InterfaceAlias $InterfaceAlias | 
         Where-Object { $_.NextHop -and $_.NextHop -ne "0.0.0.0" } | Select-Object -First 1
@@ -29,7 +29,7 @@ try {
     New-NetIPAddress -InterfaceAlias $InterfaceAlias -IPAddress $NewIPAddress -PrefixLength $PrefixLength -DefaultGateway $DefaultGateway -ErrorAction Stop
     Set-DnsClientServerAddress -InterfaceAlias $InterfaceAlias -ServerAddresses $DNSServers -ErrorAction Stop
 } catch {
-    Write-Output "Network configuration error: $_"
+    Write-Output "Võrgu konfiguratsiooni viga: $_"
 }
 
 $NewDomainName = "mihkel.sise"
@@ -39,7 +39,7 @@ try {
     Install-WindowsFeature AD-Domain-Services -IncludeManagementTools -ErrorAction Stop
     Import-Module ADDSDeployment -ErrorAction Stop
 } catch {
-    Write-Output "AD Domain Services installation error: $_"
+    Write-Output "AD domeeniteenuste installatsiooni viga: $_"
 }
 
 try {
@@ -50,7 +50,7 @@ try {
         -Force `
         -NoRebootOnCompletion -ErrorAction Stop
 } catch {
-    Write-Output "ADDS Forest installation error: $_"
+    Write-Output "ADDS metsa installatsiooni viga: $_"
 }
 
 try {
@@ -58,7 +58,7 @@ try {
     Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted -ErrorAction Stop
     Import-Module PSWindowsUpdate -ErrorAction Stop
 } catch {
-    Write-Output "Windows Update module configuration error: $_"
+    Write-Output "Windows Update’i mooduli konfiguratsiooni viga: $_"
 }
 
 $Action = New-ScheduledTaskAction `
@@ -75,7 +75,7 @@ try {
         -TaskName "WeeklyWindowsUpdate" `
         -Description "Kaivitab Windows Update iga nadal." -ErrorAction Stop
 } catch {
-    Write-Output "Scheduled task registration error: $_"
+    Write-Output "Ajastatud ülesande registreerimise viga: $_"
 }
 
 $DiskNumber = 1
@@ -84,27 +84,27 @@ try {
     $Partition = New-Partition -DiskNumber $DiskNumber -UseMaximumSize -AssignDriveLetter -ErrorAction Stop
     Format-Volume -Partition $Partition -FileSystem NTFS -NewFileSystemLabel "BackupVolume" -Confirm:$false -ErrorAction Stop
 } catch {
-    Write-Output "Disk configuration error: $_"
+    Write-Output "Ketta konfiguratsiooni viga: $_"
 }
 
 try {
     Install-Module PSWindowsBackup -Force -Confirm:$false -ErrorAction Stop
     Import-Module PSWindowsBackup -ErrorAction Stop
 } catch {
-    Write-Output "Backup module download error: $_"
+    Write-Output "Varundusmooduli allalaadimise viga: $_"
 }
 
 try {
     $BackupDriveLetter = "$($Partition.DriveLetter):"
-    Write-Output "Configuring Windows Server Backup to use drive $BackupDriveLetter"
+    Write-Output "Seadistatakse Windows Server Backup kasutama ketast $BackupDriveLetter"
     wbadmin enable backup -backupTarget:$BackupDriveLetter -include:C: -allCritical -schedule:"03:00" -quiet -ErrorAction Stop
 } catch {
-    Write-Output "Backup configuration error: $_"
+    Write-Output "Varunduse konfiguratsiooni viga: $_"
 }
 
-$restartInput = Read-Host "Skripti taitmine lopetatud. Taskaivitage susteem? ([Y]/n)"
+$restartInput = Read-Host "Skripti täitmine lõppenud. Taaskäivitage süsteem? ([Y]/n)"
 if ($restartInput -eq "" -or $restartInput.ToLower() -eq "y") {
     Restart-Computer -Force
 } else {
-    Write-Output "Susteemi taaskaivitamist ei sooritatud."
+    Write-Output "Süsteemi taaskäivitamist ei sooritatud."
 }
