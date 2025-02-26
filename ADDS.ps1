@@ -10,7 +10,7 @@ $dhcpIP = Get-NetIPAddress -InterfaceAlias $InterfaceAlias -AddressFamily IPv4 |
 if ($dhcpIP) {
     $NewIPAddress = $dhcpIP.IPAddress
     $PrefixLength = $dhcpIP.PrefixLength
-    Write-Output "Kasutatan DHCP kaudu maaratud IP aadressi $NewIPAddress staatilisena."
+    Write-Output "Kasutatan DHCP kaudu maaratud IP adressi $NewIPAddress staatilisena."
 
     $dhcpRoute = Get-NetRoute -InterfaceAlias $InterfaceAlias | 
         Where-Object { $_.NextHop -and $_.NextHop -ne "0.0.0.0" } | Select-Object -First 1
@@ -73,7 +73,7 @@ try {
         -Action $Action `
         -Trigger $Trigger `
         -TaskName "WeeklyWindowsUpdate" `
-        -Description "Kaivitab Windows Update iga naadal." -ErrorAction Stop
+        -Description "Kaivitab Windows Update iga nadal." -ErrorAction Stop
 } catch {
     Write-Output "Scheduled task registration error: $_"
 }
@@ -95,7 +95,7 @@ try {
     Write-Output "Backup configuration error: $_"
 }
 
-$restartInput = Read-Host "Skripti taitmine lopetatud. Taaskaivitage susteem? ([Y]/n)"
+$restartInput = Read-Host "Skripti taitmine lopetatud. Taskaivitage susteem? ([Y]/n)"
 if ($restartInput -eq "" -or $restartInput.ToLower() -eq "y") {
     Restart-Computer -Force
 } else {
