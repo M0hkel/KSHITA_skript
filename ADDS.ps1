@@ -11,7 +11,7 @@ $dhcpIP = Get-NetIPAddress -InterfaceAlias $InterfaceAlias -AddressFamily IPv4 |
 if ($dhcpIP) {
     $NewIPAddress = $dhcpIP.IPAddress
     $PrefixLength = $dhcpIP.PrefixLength
-    Write-Output "Kasutan DHCP kaudu määratud IP-aadressi $NewIPAddress staatilisena."
+    Write-Output "Kasutan DHCP kaudu maaratud IP-aadressi $NewIPAddress staatilisena."
     $dhcpRoute = Get-NetRoute -InterfaceAlias $InterfaceAlias |
         Where-Object { $_.NextHop -and $_.NextHop -ne "0.0.0.0" } |
         Select-Object -First 1
@@ -25,7 +25,7 @@ try {
     New-NetIPAddress -InterfaceAlias $InterfaceAlias -IPAddress $NewIPAddress -PrefixLength $PrefixLength -DefaultGateway $DefaultGateway -ErrorAction Stop
     Set-DnsClientServerAddress -InterfaceAlias $InterfaceAlias -ServerAddresses $DNSServers -ErrorAction Stop
 }
-catch { Write-Output "Võrgu konfiguratsiooni viga: $_" }
+catch { Write-Output "Vorgu konfiguratsiooni viga: $_" }
 
 $NewDomainName = "mihkel.sise"
 $SafeModePwd   = ConvertTo-SecureString "Parool1!" -AsPlainText -Force
@@ -65,10 +65,10 @@ try {
 }
 catch { Write-Output "Varunduse seadistamise viga: $_" }
 
-$restartInput = Read-Host "Skripti täitmine lõppenud. Taaskäivitage süsteem? ([Y]/n)"
+$restartInput = Read-Host "Skripti taitmine loppunud. Taaskaivitage susteem? ([Y]/n)"
 if ($restartInput -eq "" -or $restartInput.ToLower() -eq "y") {
     Restart-Computer -Force
 }
 else {
-    Write-Output "Süsteemi taaskäivitamist ei sooritatud."
+    Write-Output "Susteemi taaskaivitamist ei sooritatud."
 }
