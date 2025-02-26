@@ -88,8 +88,6 @@ try {
 }
 
 try {
-    Install-Module PSWindowsBackup -Force -Confirm:$false -ErrorAction Stop
-    Import-Module PSWindowsBackup -ErrorAction Stop
     Install-WindowsFeature Windows-Server-Backup -ErrorAction Stop
     $BackupDriveLetter = "$($Partition.DriveLetter):"
     Write-Output "Seadistatakse Windows Server Backup kasutama ketast $BackupDriveLetter"
