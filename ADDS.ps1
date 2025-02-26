@@ -91,7 +91,7 @@ try {
     Install-WindowsFeature Windows-Server-Backup -ErrorAction Stop
     $BackupDriveLetter = "$($Partition.DriveLetter):"
     Write-Output "Seadistatakse Windows Server Backup kasutama ketast $BackupDriveLetter"
-    wbadmin enable backup -backupTarget:$BackupDriveLetter -include:C: -allCritical -schedule:"03:00" -quiet -ErrorAction Stop
+    wbadmin enable backup -addtarget:$BackupDriveLetter -include:C: -allCritical -schedule:"03:00" -quiet -ErrorAction Stop
 } catch {
     Write-Output "Varunduse seadistamise viga: $_"
 }
